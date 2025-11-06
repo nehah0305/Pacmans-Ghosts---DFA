@@ -1,4 +1,5 @@
 import tkinter as tk
+import os
 import math
 import time
 
@@ -106,14 +107,43 @@ draw_curved_arrow(
     "Reach Central Base"
 )
 
-# Ghost marker
-ghost = canvas.create_oval(0, 0, 0, 0, fill="red", outline="orange", width=3)
+# Ghost marker: try to load `ghost.png` from the same folder. Fall back to an oval.
+ghost_img = None
+ghost = None
+ghost_is_image = False
+
+img_path = os.path.join(os.path.dirname(__file__), "ghost.png")
+if os.path.exists(img_path):
+    try:
+        ghost_img = tk.PhotoImage(file=img_path)
+        # If image is large, subsample by an integer factor so it fits roughly 30px
+        try:
+            iw = ghost_img.width()
+            ih = ghost_img.height()
+            max_dim = 30
+            if max(iw, ih) > max_dim:
+                sub = max(1, int(max(iw, ih) / max_dim))
+                ghost_img = ghost_img.subsample(sub, sub)
+        except Exception:
+            # If width()/height() not available or subsample fails, ignore and use as-is
+            pass
+
+        ghost = canvas.create_image(0, 0, image=ghost_img)
+        ghost_is_image = True
+    except Exception:
+        ghost = canvas.create_oval(0, 0, 0, 0, fill="red", outline="orange", width=3)
+else:
+    ghost = canvas.create_oval(0, 0, 0, 0, fill="red", outline="orange", width=3)
+
 current_state = "Wander"
 
 def move_ghost_to(state_name, prev_state):
     if not prev_state:
         x, y = positions[state_name]
-        canvas.coords(ghost, x - 15, y - 15, x + 15, y + 15)
+        if ghost_is_image:
+            canvas.coords(ghost, x, y)
+        else:
+            canvas.coords(ghost, x - 15, y - 15, x + 15, y + 15)
         return
 
     # Helper to compute adjusted endpoints and control point used by draw_curved_arrow
@@ -179,7 +209,10 @@ def move_ghost_to(state_name, prev_state):
         omt = 1 - t
         nx = omt*omt*P0[0] + 2*omt*t*C[0] + t*t*P2[0]
         ny = omt*omt*P0[1] + 2*omt*t*C[1] + t*t*P2[1]
-        canvas.coords(ghost, nx - 15, ny - 15, nx + 15, ny + 15)
+        if ghost_is_image:
+            canvas.coords(ghost, nx, ny)
+        else:
+            canvas.coords(ghost, nx - 15, ny - 15, nx + 15, ny + 15)
         root.update()
         time.sleep(0.02)
 
@@ -191,7 +224,10 @@ def move_ghost_to(state_name, prev_state):
         t = i / steps_center
         cx = start_x + (center_x - start_x) * t
         cy = start_y + (center_y - start_y) * t
-        canvas.coords(ghost, cx - 15, cy - 15, cx + 15, cy + 15)
+        if ghost_is_image:
+            canvas.coords(ghost, cx, cy)
+        else:
+            canvas.coords(ghost, cx - 15, cy - 15, cx + 15, cy + 15)
         root.update()
         time.sleep(0.02)
 
