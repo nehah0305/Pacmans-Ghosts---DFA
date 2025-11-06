@@ -20,10 +20,10 @@ positions = {
 }
 
 colors = {
-    "Wander": "#A8E6CF",
-    "Chase": "#FF8C94",
-    "Flee": "#9ED2FF",
-    "Return": "#D6A2E8"
+    "Wander": "#00EA69",
+    "Chase": "#FF9500",
+    "Flee": "#7600FD",
+    "Return": "#F6FF00"
 }
 
 radius = 60
