@@ -75,8 +75,14 @@ radius = 55
 
 root = tk.Tk()
 root.title("Pac-Man Ghost DFA Simulation")
-canvas = tk.Canvas(root, width=1400, height=900, bg="#F5F5F5")
-canvas.pack(padx=10, pady=10)
+
+# Create main container frame
+main_frame = tk.Frame(root)
+main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+# Create canvas on the left
+canvas = tk.Canvas(main_frame, width=1200, height=900, bg="#F5F5F5")
+canvas.pack(side=tk.LEFT, padx=(0, 10))
 
 # Draw states
 for state, (x, y) in positions.items():
@@ -340,18 +346,34 @@ def move_ghost_to(state_name, prev_state):
         return
 
 
-log = tk.Text(root, height=8, width=120, bg="#1E1E1E", fg="#00FF00", font=("Courier", 11))
-log.pack(pady=10)
-log.insert(tk.END, "=== Pac-Man Ghost DFA Simulation ===\n")
-log.insert(tk.END, "Press keys to trigger transitions:\n")
+# Create right side frame for log
+right_frame = tk.Frame(main_frame, bg="#F5F5F5")
+right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+# Add log title
+log_title = tk.Label(right_frame, text="Transition Log", font=("Helvetica", 14, "bold"), bg="#F5F5F5")
+log_title.pack(pady=(0, 5))
+
+# Create scrollbar for log
+scrollbar = tk.Scrollbar(right_frame)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+# Create log text widget
+log = tk.Text(right_frame, height=50, width=35, bg="#1E1E1E", fg="#00FF00",
+              font=("Courier", 10), yscrollcommand=scrollbar.set, wrap=tk.WORD)
+log.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+scrollbar.config(command=log.yview)
+
+log.insert(tk.END, "=== Pac-Man Ghost DFA ===\n\n")
+log.insert(tk.END, "Press keys to trigger transitions:\n\n")
 log.insert(tk.END, "  s = Spot Pac-Man\n")
 log.insert(tk.END, "  l = Lose Pac-Man\n")
 log.insert(tk.END, "  p = Power Pellet\n")
 log.insert(tk.END, "  x = Expire\n")
 log.insert(tk.END, "  e = Eaten by Pac-Man\n")
 log.insert(tk.END, "  b = Reach Base\n")
-log.insert(tk.END, "  g = Game Over\n")
-log.insert(tk.END, "=" * 50 + "\n")
+log.insert(tk.END, "  g = Game Over\n\n")
+log.insert(tk.END, "=" * 35 + "\n\n")
 log.config(state=tk.DISABLED)
 
 
