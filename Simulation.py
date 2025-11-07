@@ -15,7 +15,7 @@ transitions = {
         "s": "Chase",
         "p": "Flee",
         "g": "GameOver",
-        "l": "Invalid",
+        "l": "Wander",
         "x": "Invalid",
         "e": "Invalid",
         "b": "Invalid"
@@ -24,7 +24,7 @@ transitions = {
         "l": "Wander",
         "p": "Flee",
         "g": "GameOver",
-        "s": "Invalid",
+        "s": "Chase",
         "x": "Invalid",
         "e": "Invalid",
         "b": "Invalid"
@@ -33,9 +33,9 @@ transitions = {
         "x": "Wander",
         "e": "Return",
         "g": "GameOver",
-        "s": "Invalid",
-        "l": "Invalid",
-        "p": "Invalid",
+        "s": "Flee",
+        "l": "Flee",
+        "p": "Flee",
         "b": "Invalid"
     },
     "Return": {
@@ -53,12 +53,12 @@ transitions = {
 
 # Optimized positions
 positions = {
-    "Wander": (250, 400),
-    "Chase": (450, 150),
-    "Flee": (850, 100),
-    "Return": (550, 600),
-    "Invalid": (1100, 600),
-    "GameOver": (1100, 200)
+    "Wander": (250, 480),
+    "Chase": (450, 230),
+    "Flee": (850, 180),
+    "Return": (550, 680),
+    "Invalid": (1100, 680),
+    "GameOver": (1100, 280)
 }
 
 # State colors
@@ -170,37 +170,40 @@ canvas.create_line(start_x - 120, start_y, start_x - radius - 10, start_y,
 canvas.create_text(start_x - 150, start_y, text="Start", font=("Helvetica", 12, "bold"))
 
 # Transitions
-draw_curved_arrow(*positions["Wander"], *positions["Chase"], "s", curve_strength=50, label_pos=(320, 310))
-draw_curved_arrow(*positions["Chase"], *positions["Wander"], "l", curve_strength=50, label_pos=(320, 240))
+draw_curved_arrow(*positions["Wander"], *positions["Chase"], "s", curve_strength=50, label_pos=(320, 390))
+draw_curved_arrow(*positions["Chase"], *positions["Wander"], "l", curve_strength=50, label_pos=(320, 320))
 
 # ✅ Single clean arrows between Wander ↔ Flee
-draw_curved_arrow(*positions["Wander"], *positions["Flee"], "x", curve_strength=70, label_pos=(490, 270))
-draw_curved_arrow(*positions["Flee"], *positions["Wander"], "p", curve_strength=70, label_pos=(650, 260))
+draw_curved_arrow(*positions["Wander"], *positions["Flee"], "x", curve_strength=70, label_pos=(490, 350))
+draw_curved_arrow(*positions["Flee"], *positions["Wander"], "p", curve_strength=70, label_pos=(650, 340))
 
-draw_curved_arrow(*positions["Chase"], *positions["Flee"], "p", curve_strength=-30, label_pos=(680, 90))
-draw_curved_arrow(*positions["Flee"], *positions["Return"], "e", curve_strength=60, label_pos=(710, 310))
-draw_curved_arrow(*positions["Return"], *positions["Wander"], "b", curve_strength=-80, label_pos=(320, 530))
+draw_curved_arrow(*positions["Chase"], *positions["Flee"], "p", curve_strength=-30, label_pos=(680, 170))
+draw_curved_arrow(*positions["Flee"], *positions["Return"], "e", curve_strength=60, label_pos=(710, 390))
+draw_curved_arrow(*positions["Return"], *positions["Wander"], "b", curve_strength=-80, label_pos=(320, 610))
 
 invalid_transitions = [
-    ("Wander", "[l,x,e,b]", -100, (400, 430)),
-    ("Chase", "[s,x,e,b]", 80, (860, 440)),
-    ("Flee", "[s,l,p,b]", -30, (960, 370)),
-    ("Return", "[s,l,p,x,e]", 100, (800, 630))
+    ("Wander", "[x,e,b]", -100, (400, 510)),
+    ("Chase", "[x,e,b]", 80, (860, 520)),
+    ("Flee", "[b]", -30, (960, 450)),
+    ("Return", "[s,l,p,x,e]", 100, (800, 710))
 ]
 
 for state, sym_str, curve, pos in invalid_transitions:
     draw_curved_arrow(*positions[state], *positions["Invalid"], sym_str, curve_strength=curve, label_pos=pos)
 
 gameover_transitions = [
-    ("Wander", 100, (580, 350)),
-    ("Chase", 60, (590, 150)),
-    ("Flee", 30, (960, 120)),
-    ("Return", -80, (670, 530))
+    ("Wander", 100, (580, 430)),
+    ("Chase", 60, (590, 230)),
+    ("Flee", 30, (960, 200)),
+    ("Return", -80, (670, 610))
 ]
 
 for state, curve, pos in gameover_transitions:
     draw_curved_arrow(*positions[state], *positions["GameOver"], "g", curve_strength=curve, label_pos=pos)
 
+draw_curved_arrow(*positions["Wander"], *positions["Wander"], "l")
+draw_curved_arrow(*positions["Chase"], *positions["Chase"], "s")
+draw_curved_arrow(*positions["Flee"], *positions["Flee"], "[s,l,p]")
 draw_curved_arrow(*positions["Invalid"], *positions["Invalid"], "All")
 draw_curved_arrow(*positions["GameOver"], *positions["GameOver"], "All")
 
@@ -221,6 +224,10 @@ transition_curve_map = {
     ("Flee", "GameOver"): 30,
     ("Return", "GameOver"): -80,
     ("Invalid", "GameOver"): -100,
+    # Self-loops
+    ("Wander", "Wander"): 0,
+    ("Chase", "Chase"): 0,
+    ("Flee", "Flee"): 0,
     ("Invalid", "Invalid"): 0,
     ("GameOver", "GameOver"): 0
 }
